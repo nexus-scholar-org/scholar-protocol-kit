@@ -1,0 +1,42 @@
+{
+  "protocol_id": "proto-20260901-scoping-empty-matrix",
+  "genesis_timestamp": "2026-09-01T00:00:00+00:00",
+  "project_slug": "ai-ethics-landscape",
+  "playbook_type": "SCOPING_REVIEW",
+  "title": "Scoping the AI Ethics Landscape: No Matrix Configured",
+  "lead_researcher": "Researcher",
+  "target_venue_type": "Journal of AI Ethics",
+  "unit_of_analysis": "Published AI ethics frameworks and guidelines",
+  "epistemological_rationale": "A broad interpretive scoping of the AI ethics landscape does not yet warrant structured extraction dimensions.",
+  "research_questions": [
+    {
+      "text": "What ethical principles are most commonly foregrounded in AI governance frameworks published since 2018?",
+      "target_facet": "ethical_principles",
+      "synthesis_type": "Narrative",
+      "required_evidence_type": "Descriptive framework or guideline document"
+    }
+  ],
+  "core_concepts": [
+    {
+      "concept": "AI Ethics",
+      "synonyms": ["algorithmic fairness", "responsible AI", "AI governance", "trustworthy AI"],
+      "boolean_operator": "OR"
+    }
+  ],
+  "start_year": 2018,
+  "end_year": 2026,
+  "inclusion_criteria": [
+    {
+      "criterion": "Document explicitly addresses ethical principles or guidelines for AI systems",
+      "maps_to_rqs": ["RQ1"]
+    }
+  ],
+  "exclusion_criteria": [
+    {
+      "criterion": "Grey literature without peer review or institutional endorsement",
+      "maps_to_rqs": [],
+      "reason_category": "WRONG_SOURCE_TYPE"
+    }
+  ],
+  "reproducibility_das_cas_check": false
+}

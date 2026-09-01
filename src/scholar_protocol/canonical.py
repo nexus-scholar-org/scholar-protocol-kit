@@ -60,13 +60,22 @@ def _ordered_model_dict(protocol: ResearchProtocol) -> dict[str, Any]:
     raw: dict[str, Any] = protocol.model_dump(mode="json", by_alias=True)
 
     # Sort the free-form dict fields that have no semantically defined key order.
+    # Rule: any Dict[str, ...] field whose keys are semantically arbitrary gets
+    # sorted alphabetically.  Typed Pydantic sub-models (e.g. VerificationConfig)
+    # are already stable via declaration order and do NOT need sorting.
     if "metadata" in raw and isinstance(raw["metadata"], dict):
         raw["metadata"] = dict(sorted(raw["metadata"].items()))
 
     if "search_strategy" in raw:
         ss = raw["search_strategy"]
+        # date_range: {"end_year": ..., "start_year": ...}  (e < s)
         if isinstance(ss.get("date_range"), dict):
             ss["date_range"] = dict(sorted(ss["date_range"].items()))
+        # target_candidate_pool_size: {"max": ..., "min": ...}  (a < i)
+        if isinstance(ss.get("target_candidate_pool_size"), dict):
+            ss["target_candidate_pool_size"] = dict(
+                sorted(ss["target_candidate_pool_size"].items())
+            )
 
     # Ensure float serialization is stable for the trust threshold.
     if "verification" in raw:

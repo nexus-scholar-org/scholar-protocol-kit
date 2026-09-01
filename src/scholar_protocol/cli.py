@@ -16,6 +16,10 @@ scholar-protocol canon <path>
     Print canonical JSON bytes to stdout.  Useful for diffing generator output
     against golden fixtures.
     Exit 0 = success.  Exit 2 = read/parse failure.
+
+scholar-protocol compile <intent_path>
+    Compile an intent packet into a canonical protocol.json, printed to stdout.
+    Exit 0 = success.  Exit 2 = read/parse failure.
 """
 
 from __future__ import annotations
@@ -32,6 +36,7 @@ from rich.text import Text
 from scholar_protocol.canonical import canonical_fingerprint, canonical_json
 from scholar_protocol.models import ResearchProtocol
 from scholar_protocol.validate import validate_protocol
+from scholar_protocol.compiler import compile_from_file
 
 app = typer.Typer(
     name="scholar-protocol",
@@ -136,6 +141,28 @@ def canon(
         raise typer.Exit(2)
 
     protocol = _load_protocol(path)
+    # Write bytes directly to stdout buffer; no trailing newline per spec.
+    sys.stdout.buffer.write(canonical_json(protocol))
+
+
+@app.command()
+def compile(
+    path: pathlib.Path = typer.Argument(..., help="Path to intent.json packet"),
+) -> None:
+    """Compile an intent packet into a canonical protocol.json.
+
+    The compiled protocol.json is printed directly to stdout as canonical bytes.
+    """
+    if not path.exists():
+        console.print(f"[bold red]Error:[/] File not found: {path}")
+        raise typer.Exit(2)
+
+    try:
+        protocol = compile_from_file(path)
+    except Exception as exc:
+        console.print(f"[bold red]Error:[/] Cannot compile {path}: {exc}")
+        raise typer.Exit(2) from exc
+
     # Write bytes directly to stdout buffer; no trailing newline per spec.
     sys.stdout.buffer.write(canonical_json(protocol))
 

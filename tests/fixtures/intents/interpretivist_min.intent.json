@@ -1,0 +1,107 @@
+{
+  "protocol_id": "proto-20260901-interpretivist-min",
+  "genesis_timestamp": "2026-09-01T00:00:00+00:00",
+  "project_slug": "developer-experience-qualitative",
+  "playbook_type": "SCOPING_REVIEW",
+  "title": "Developer Experience with AI Pair Programmers: An Interpretivist Scoping Review",
+  "lead_researcher": "Researcher",
+  "target_venue_type": "CHI / CSCW",
+  "timeline_weeks": 8,
+  "primary_paradigm": "Interpretivist",
+  "trustworthiness_framework": "Lincoln & Guba Trustworthiness Criteria",
+  "incompatible_concepts": ["statistical significance", "p-value", "randomised controlled trial"],
+  "unit_of_analysis": "Developer narratives, interviews, and observational studies",
+  "epistemological_rationale": "Human meaning-making, lived experience, and socio-technical context are best examined through an interpretivist lens drawing on thematic and discourse analysis.",
+  "research_questions": [
+    {
+      "text": "How do software developers describe their experience of trust and perceived utility when pair programming with AI tools?",
+      "target_facet": "perceived_utility",
+      "synthesis_type": "Taxonomy",
+      "required_evidence_type": "Verbatim interview excerpts or observational field notes"
+    },
+    {
+      "text": "What socio-technical barriers to adoption of AI coding assistants are identified in qualitative studies?",
+      "target_facet": "barriers_adoption",
+      "synthesis_type": "Narrative",
+      "required_evidence_type": "Coded themes from qualitative data"
+    }
+  ],
+  "core_concepts": [
+    {
+      "concept": "Developer Experience AI Tools",
+      "synonyms": ["AI pair programming", "Copilot user study", "AI coding assistant UX", "developer perception LLM"],
+      "boolean_operator": "OR"
+    },
+    {
+      "concept": "Qualitative Software Engineering Research",
+      "synonyms": ["thematic analysis", "grounded theory", "interview study", "ethnography"],
+      "boolean_operator": "OR"
+    }
+  ],
+  "start_year": 2020,
+  "end_year": 2026,
+  "pool_min": 80,
+  "pool_max": 600,
+  "two_tier_screening": false,
+  "inclusion_criteria": [
+    {
+      "criterion": "Involves human participants using an AI coding assistant in a real or simulated development task",
+      "maps_to_rqs": ["RQ1", "RQ2"]
+    },
+    {
+      "criterion": "Uses a qualitative or mixed-methods design (interviews, observation, think-aloud, diary study)",
+      "maps_to_rqs": ["RQ1", "RQ2"]
+    }
+  ],
+  "exclusion_criteria": [
+    {
+      "criterion": "Studies reporting only quantitative benchmark scores with no qualitative component",
+      "maps_to_rqs": ["RQ1", "RQ2"],
+      "reason_category": "WRONG_METHOD"
+    },
+    {
+      "criterion": "Studies not involving human participants (pure model evaluation papers)",
+      "maps_to_rqs": ["RQ1"],
+      "reason_category": "WRONG_POPULATION"
+    }
+  ],
+  "reproducibility_das_cas_check": false,
+  "matrix_dimensions": [
+    {
+      "id": "study_method",
+      "name": "Qualitative Study Method",
+      "description": "Extract study methodology type (e.g. semi-structured interview, ethnography, diary study, think-aloud).",
+      "target_section_category": "methodology",
+      "data_type": "categorical",
+      "required": true,
+      "fallback_value": "Not Reported"
+    },
+    {
+      "id": "participant_count",
+      "name": "Participant Count (N)",
+      "description": "Extract number of participants in the study.",
+      "target_section_category": "methodology",
+      "data_type": "numeric",
+      "required": true,
+      "fallback_value": "Not Reported"
+    },
+    {
+      "id": "identified_themes",
+      "name": "Identified Themes / Codes",
+      "description": "Extract the named themes or codes reported by the authors.",
+      "target_section_category": "results_empirical",
+      "data_type": "list",
+      "required": false,
+      "fallback_value": "Not Reported"
+    },
+    {
+      "id": "transferability",
+      "name": "Transferability / Trustworthiness Statement",
+      "description": "Extract the declared transferability or trustworthiness claims of the authors.",
+      "target_section_category": "discussion_limitations",
+      "data_type": "free_text",
+      "required": false,
+      "fallback_value": "Not Reported"
+    }
+  ]
+}

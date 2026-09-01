@@ -1,0 +1,54 @@
+{
+  "protocol_id": "proto-20260901-design-science-min",
+  "genesis_timestamp": "2026-09-01T00:00:00+00:00",
+  "project_slug": "design-science-min",
+  "playbook_type": "DESIGN_SCIENCE",
+  "title": "Minimal Design Science Protocol",
+  "lead_researcher": "Researcher",
+  "target_venue_type": "IEEE Transactions",
+  "unit_of_analysis": "Computational artifacts and benchmark test suites",
+  "epistemological_rationale": "Evaluating computational artifacts and their empirical utility justifies a Design Science paradigm.",
+  "research_questions": [
+    {
+      "text": "What evaluation metrics are used to assess code generation artifacts?",
+      "target_facet": "evaluation_metrics",
+      "synthesis_type": "Comparative Matrix",
+      "required_evidence_type": "Quantitative benchmark scores"
+    }
+  ],
+  "core_concepts": [
+    {
+      "concept": "Code Generation",
+      "synonyms": ["code synthesis", "program synthesis"],
+      "boolean_operator": "OR"
+    }
+  ],
+  "start_year": 2020,
+  "end_year": 2026,
+  "pool_min": 100,
+  "pool_max": 400,
+  "inclusion_criteria": [
+    {
+      "criterion": "Paper presents a computational artifact for code generation",
+      "maps_to_rqs": ["RQ1"]
+    }
+  ],
+  "exclusion_criteria": [
+    {
+      "criterion": "Papers with no empirical evaluation of a code artifact",
+      "maps_to_rqs": ["RQ1"],
+      "reason_category": "NO_EVALUATION"
+    }
+  ],
+  "matrix_dimensions": [
+    {
+      "id": "benchmark_dataset",
+      "name": "Benchmark Dataset",
+      "description": "Extract the benchmark dataset used to evaluate the artifact.",
+      "target_section_category": "methodology",
+      "data_type": "categorical",
+      "required": true,
+      "fallback_value": "Not Reported"
+    }
+  ]
+}

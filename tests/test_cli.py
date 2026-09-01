@@ -14,6 +14,7 @@ FIXTURES = pathlib.Path(__file__).parent / "fixtures"
 VALID_DIR = FIXTURES / "valid"
 INVALID_DIR = FIXTURES / "invalid"
 CANONICAL_DIR = FIXTURES / "canonical"
+INTENTS_DIR = FIXTURES / "intents"
 
 # Resolve the installed script or fall back to module invocation.
 _SCRIPT = (
@@ -163,3 +164,40 @@ def test_canon_nonexistent_exit_2() -> None:
     """canon on a missing file must exit with code 2."""
     result = run("canon", _MISSING)
     assert result.returncode == 2
+
+
+# ---------------------------------------------------------------------------
+# scholar-protocol compile
+# ---------------------------------------------------------------------------
+
+
+def test_compile_output_is_valid_json() -> None:
+    """compile must output valid JSON bytes to stdout."""
+    result = run("compile", str(INTENTS_DIR / "design_science_min.intent.json"))
+    assert result.returncode == 0
+    # Must parse without error.
+    parsed = json.loads(result.stdout)
+    assert "$schema" in parsed
+
+
+def test_compile_output_is_compact() -> None:
+    """compile output must not contain ': ' or ', ' (compact separators)."""
+    result = run("compile", str(INTENTS_DIR / "design_science_min.intent.json"))
+    assert result.returncode == 0
+    assert ": " not in result.stdout
+    assert ", " not in result.stdout
+
+
+def test_compile_output_no_trailing_newline() -> None:
+    """compile output must not end with a newline."""
+    result = run("compile", str(INTENTS_DIR / "design_science_min.intent.json"))
+    assert not result.stdout.endswith("\n"), (
+        "compile output must not end with newline"
+    )
+
+
+def test_compile_nonexistent_exit_2() -> None:
+    """compile on a missing file must exit with code 2."""
+    result = run("compile", _MISSING)
+    assert result.returncode == 2
+
