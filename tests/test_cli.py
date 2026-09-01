@@ -201,3 +201,24 @@ def test_compile_nonexistent_exit_2() -> None:
     result = run("compile", _MISSING)
     assert result.returncode == 2
 
+
+# ---------------------------------------------------------------------------
+# scholar-protocol render-criteria
+# ---------------------------------------------------------------------------
+
+
+def test_render_criteria_output_is_markdown() -> None:
+    """render-criteria must output a Markdown document with expected headers."""
+    result = run("render-criteria", str(VALID_DIR / "design_science_min.json"))
+    assert result.returncode == 0
+    assert "# Screening Criteria: Minimal Design Science Protocol" in result.stdout
+    assert "## Inclusion Criteria" in result.stdout
+    assert "### INC-01" in result.stdout
+
+
+def test_render_criteria_nonexistent_exit_2() -> None:
+    """render-criteria on a missing file must exit with code 2."""
+    result = run("render-criteria", _MISSING)
+    assert result.returncode == 2
+
+

@@ -20,6 +20,10 @@ scholar-protocol canon <path>
 scholar-protocol compile <intent_path>
     Compile an intent packet into a canonical protocol.json, printed to stdout.
     Exit 0 = success.  Exit 2 = read/parse failure.
+
+scholar-protocol render-criteria <path>
+    Render a valid protocol.json into a Markdown SCREENING_CRITERIA.md document.
+    Outputs to stdout. Exit 0 = success. Exit 2 = read/parse failure.
 """
 
 from __future__ import annotations
@@ -37,6 +41,7 @@ from scholar_protocol.canonical import canonical_fingerprint, canonical_json
 from scholar_protocol.models import ResearchProtocol
 from scholar_protocol.validate import validate_protocol
 from scholar_protocol.compiler import compile_from_file
+from scholar_protocol.render import render_screening_criteria
 
 app = typer.Typer(
     name="scholar-protocol",
@@ -165,6 +170,23 @@ def compile(
 
     # Write bytes directly to stdout buffer; no trailing newline per spec.
     sys.stdout.buffer.write(canonical_json(protocol))
+
+
+@app.command()
+def render_criteria(
+    path: pathlib.Path = typer.Argument(..., help="Path to protocol.json"),
+) -> None:
+    """Render a protocol.json into a human-readable SCREENING_CRITERIA.md document.
+
+    The Markdown document is printed to stdout.
+    """
+    if not path.exists():
+        console.print(f"[bold red]Error:[/] File not found: {path}")
+        raise typer.Exit(2)
+
+    protocol = _load_protocol(path)
+    md = render_screening_criteria(protocol)
+    print(md)
 
 
 if __name__ == "__main__":
