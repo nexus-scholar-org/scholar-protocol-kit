@@ -1,0 +1,483 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/v1/protocol.schema.json",
+  "description": "The master Phase 0 research protocol.\n\nField declaration order is the canonical serialization order.\nThe ``$schema`` field is aliased to ``schema_version`` so that JSON\noutput contains the ``$schema`` key required by the JSON Schema spec,\nwhile Python code uses the valid Python identifier ``schema_version``.",
+  "properties": {
+    "$schema": {
+      "default": "schemas/v1/protocol.schema.json",
+      "description": "URI of the JSON Schema (relative kit path, resolved locally by the validator)",
+      "title": "$Schema",
+      "type": "string"
+    },
+    "protocol_id": {
+      "description": "Unique protocol identifier, e.g. 'proto-20260901-ai-dev'",
+      "title": "Protocol Id",
+      "type": "string"
+    },
+    "created_at": {
+      "description": "ISO-8601 timestamp of protocol creation (UTC)",
+      "title": "Created At",
+      "type": "string"
+    },
+    "project_slug": {
+      "description": "Workspace directory slug, e.g. 'ai-developer-productivity'",
+      "title": "Project Slug",
+      "type": "string"
+    },
+    "playbook_type": {
+      "$ref": "#/definitions/PlaybookType",
+      "description": "Canonical research archetype driving default parameters"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "description": "Freeform project metadata (title, researcher, venue, timeline)",
+      "title": "Metadata",
+      "type": "object"
+    },
+    "epistemology": {
+      "$ref": "#/definitions/EpistemologyConfig"
+    },
+    "research_questions": {
+      "description": "At least one research question is required",
+      "items": {
+        "$ref": "#/definitions/ResearchQuestion"
+      },
+      "minItems": 1,
+      "title": "Research Questions",
+      "type": "array"
+    },
+    "search_strategy": {
+      "$ref": "#/definitions/SearchStrategy"
+    },
+    "screening_criteria": {
+      "$ref": "#/definitions/ScreeningCriteria"
+    },
+    "matrix_dimensions": {
+      "description": "Custom extraction dimensions (empty list = no extraction configured)",
+      "items": {
+        "$ref": "#/definitions/MatrixDimension"
+      },
+      "title": "Matrix Dimensions",
+      "type": "array"
+    },
+    "verification": {
+      "$ref": "#/definitions/VerificationConfig"
+    }
+  },
+  "required": [
+    "protocol_id",
+    "project_slug",
+    "playbook_type",
+    "epistemology",
+    "research_questions",
+    "search_strategy",
+    "screening_criteria"
+  ],
+  "title": "ResearchProtocol",
+  "type": "object",
+  "definitions": {
+    "ConceptCluster": {
+      "description": "Conceptual keyword cluster with boolean operator for query expansion.",
+      "properties": {
+        "concept": {
+          "description": "Primary conceptual term",
+          "title": "Concept",
+          "type": "string"
+        },
+        "synonyms": {
+          "description": "Alternative keyword synonyms (author order preserved)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Synonyms",
+          "type": "array"
+        },
+        "boolean_operator": {
+          "default": "OR",
+          "description": "Operator joining synonyms: 'OR' or 'AND'",
+          "title": "Boolean Operator",
+          "type": "string"
+        }
+      },
+      "required": [
+        "concept"
+      ],
+      "title": "ConceptCluster",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "DimensionDataType": {
+      "description": "Supported data types for extracted matrix dimensions.",
+      "enum": [
+        "free_text",
+        "numeric",
+        "categorical",
+        "list"
+      ],
+      "title": "DimensionDataType",
+      "type": "string"
+    },
+    "EpistemologicalParadigm": {
+      "description": "Core epistemological stances.",
+      "enum": [
+        "Positivist",
+        "Interpretivist",
+        "Design Science",
+        "Pragmatist / Mixed Methods"
+      ],
+      "title": "EpistemologicalParadigm",
+      "type": "string"
+    },
+    "EpistemologyConfig": {
+      "description": "Epistemological stance, rigor standard, and vocabulary boundaries.",
+      "properties": {
+        "primary_paradigm": {
+          "$ref": "#/definitions/EpistemologicalParadigm",
+          "description": "The dominant epistemological stance for this research"
+        },
+        "secondary_paradigm": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/EpistemologicalParadigm"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional supplementary paradigm (e.g. for mixed-methods designs)"
+        },
+        "unit_of_analysis": {
+          "description": "The concrete entity being studied, e.g. 'Software developer commit diffs'",
+          "title": "Unit Of Analysis",
+          "type": "string"
+        },
+        "trustworthiness_framework": {
+          "description": "Quality / rigor framework, e.g. 'PRISMA 2020', 'Lincoln & Guba', 'Hevner DSR'",
+          "title": "Trustworthiness Framework",
+          "type": "string"
+        },
+        "epistemological_rationale": {
+          "description": "Narrative justification for the paradigm choice",
+          "title": "Epistemological Rationale",
+          "type": "string"
+        },
+        "incompatible_concepts": {
+          "description": "Terms suppressed from search / synthesis under this paradigm",
+          "items": {
+            "type": "string"
+          },
+          "title": "Incompatible Concepts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "primary_paradigm",
+        "unit_of_analysis",
+        "trustworthiness_framework",
+        "epistemological_rationale"
+      ],
+      "title": "EpistemologyConfig",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "MatrixDimension": {
+      "description": "Dynamic, domain-customisable matrix extraction dimension.\n\nThese dimensions drive the RAG extractor in Phase 2.  They are inert\nconfiguration in Cycle A \u2014 no pipeline reads them yet.  ``matrix_dimensions``\ndefaults to an empty list, which is a valid (warnings-only) state.",
+      "properties": {
+        "id": {
+          "description": "Unique slug used as the extraction column key, e.g. 'sample_size'",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Human-readable column header, e.g. 'Sample Size (N)'",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "Guidance to the RAG extractor on what text to capture",
+          "title": "Description",
+          "type": "string"
+        },
+        "target_section_category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Preferred source section: 'methodology', 'results_empirical', 'discussion_limitations', or 'abstract_intro'.  Null = search all sections.",
+          "title": "Target Section Category"
+        },
+        "data_type": {
+          "$ref": "#/definitions/DimensionDataType",
+          "default": "free_text",
+          "description": "Expected data type of the extracted value"
+        },
+        "required": {
+          "default": false,
+          "description": "When True the extractor flags papers that omit this dimension",
+          "title": "Required",
+          "type": "boolean"
+        },
+        "fallback_value": {
+          "default": "Not Reported",
+          "description": "Placeholder used when the paper does not report this dimension",
+          "title": "Fallback Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description"
+      ],
+      "title": "MatrixDimension",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "PlaybookType": {
+      "description": "Canonical research playbook archetypes.",
+      "enum": [
+        "PRISMA_SLR",
+        "SCOPING_REVIEW",
+        "RAPID_EVIDENCE",
+        "DESIGN_SCIENCE",
+        "STUDENT_DISSERTATION"
+      ],
+      "title": "PlaybookType",
+      "type": "string"
+    },
+    "ResearchQuestion": {
+      "description": "A formal, refined research question.",
+      "properties": {
+        "id": {
+          "description": "Unique identifier e.g. 'RQ1', 'RQ2'",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "description": "Formal refined research question text",
+          "title": "Text",
+          "type": "string"
+        },
+        "target_facet": {
+          "description": "The conceptual facet addressed, e.g. 'evaluation_metrics'",
+          "title": "Target Facet",
+          "type": "string"
+        },
+        "synthesis_type": {
+          "default": "Comparative Matrix",
+          "description": "How findings will be synthesised, e.g. 'Comparative Matrix', 'Taxonomy', 'Narrative'",
+          "title": "Synthesis Type",
+          "type": "string"
+        },
+        "required_evidence_type": {
+          "description": "Evidence class required to answer this RQ, e.g. 'Quantitative telemetry'",
+          "title": "Required Evidence Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "target_facet",
+        "required_evidence_type"
+      ],
+      "title": "ResearchQuestion",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ScreeningCriteria": {
+      "description": "Two-tier PRISMA screening configuration.",
+      "properties": {
+        "inclusion": {
+          "description": "At least one inclusion criterion is required",
+          "items": {
+            "$ref": "#/definitions/ScreeningCriterion"
+          },
+          "minItems": 1,
+          "title": "Inclusion",
+          "type": "array"
+        },
+        "exclusion": {
+          "description": "At least one exclusion criterion is required",
+          "items": {
+            "$ref": "#/definitions/ScreeningCriterion"
+          },
+          "minItems": 1,
+          "title": "Exclusion",
+          "type": "array"
+        },
+        "two_tier_screening": {
+          "default": true,
+          "description": "When True: Tier 1 = Title/Abstract screen, Tier 2 = Full Text",
+          "title": "Two Tier Screening",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "inclusion",
+        "exclusion"
+      ],
+      "title": "ScreeningCriteria",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ScreeningCriterion": {
+      "description": "A single inclusion or exclusion criterion.",
+      "properties": {
+        "id": {
+          "description": "Unique criterion id e.g. 'INC-01', 'EXC-01'",
+          "title": "Id",
+          "type": "string"
+        },
+        "criterion": {
+          "description": "Explicit condition description",
+          "title": "Criterion",
+          "type": "string"
+        },
+        "maps_to_rqs": {
+          "description": "RQ ids this criterion serves (must reference existing RQ ids)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Maps To Rqs",
+          "type": "array"
+        },
+        "reason_category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional rejection category e.g. 'WRONG_POPULATION', 'WRONG_OUTCOME'",
+          "title": "Reason Category"
+        }
+      },
+      "required": [
+        "id",
+        "criterion"
+      ],
+      "title": "ScreeningCriterion",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SearchStrategy": {
+      "description": "Federated multi-provider search strategy.",
+      "properties": {
+        "core_concepts": {
+          "description": "At least one concept cluster is required",
+          "items": {
+            "$ref": "#/definitions/ConceptCluster"
+          },
+          "minItems": 1,
+          "title": "Core Concepts",
+          "type": "array"
+        },
+        "target_databases": {
+          "default": [
+            "openalex",
+            "semanticscholar",
+            "crossref",
+            "arxiv"
+          ],
+          "description": "Target academic databases to query",
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Databases",
+          "type": "array"
+        },
+        "date_range": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": "Inclusive year bounds for the search window",
+          "title": "Date Range",
+          "type": "object"
+        },
+        "languages": {
+          "default": [
+            "en"
+          ],
+          "description": "ISO 639-1 language codes; must be non-empty",
+          "items": {
+            "type": "string"
+          },
+          "title": "Languages",
+          "type": "array"
+        },
+        "open_access_preferred": {
+          "default": true,
+          "description": "Prioritise open-access sources when True",
+          "title": "Open Access Preferred",
+          "type": "boolean"
+        },
+        "target_candidate_pool_size": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Expected size of the initial candidate pool (min <= max)",
+          "title": "Target Candidate Pool Size",
+          "type": "object"
+        }
+      },
+      "required": [
+        "core_concepts"
+      ],
+      "title": "SearchStrategy",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "VerificationConfig": {
+      "description": "Phase 4 Trust verification audit flags.",
+      "properties": {
+        "retraction_check_required": {
+          "default": true,
+          "description": "Require retraction watch scan before inclusion",
+          "title": "Retraction Check Required",
+          "type": "boolean"
+        },
+        "coi_and_funding_audit_required": {
+          "default": true,
+          "description": "Require conflict-of-interest and funding disclosure audit",
+          "title": "Coi And Funding Audit Required",
+          "type": "boolean"
+        },
+        "reproducibility_das_cas_check": {
+          "default": true,
+          "description": "Require data-availability and code-availability statement check",
+          "title": "Reproducibility Das Cas Check",
+          "type": "boolean"
+        },
+        "minimum_trust_score_threshold": {
+          "default": 5.0,
+          "description": "Minimum Phase 4 trust score [0.0, 10.0] for a paper to be included",
+          "maximum": 10.0,
+          "minimum": 0.0,
+          "title": "Minimum Trust Score Threshold",
+          "type": "number"
+        }
+      },
+      "title": "VerificationConfig",
+      "type": "object",
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

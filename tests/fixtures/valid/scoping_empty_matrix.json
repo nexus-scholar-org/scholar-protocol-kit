@@ -1,0 +1,76 @@
+{
+  "$schema": "schemas/v1/protocol.schema.json",
+  "protocol_id": "proto-20260901-scoping-empty-matrix",
+  "created_at": "2026-09-01T00:00:00+00:00",
+  "project_slug": "ai-ethics-landscape",
+  "playbook_type": "SCOPING_REVIEW",
+  "metadata": {
+    "lead_researcher": "Researcher",
+    "target_venue_type": "Journal of AI Ethics",
+    "timeline_weeks": 6,
+    "title": "Scoping the AI Ethics Landscape: No Matrix Configured"
+  },
+  "epistemology": {
+    "epistemological_rationale": "A broad interpretive scoping of the AI ethics landscape does not yet warrant structured extraction dimensions.",
+    "incompatible_concepts": [],
+    "primary_paradigm": "Pragmatist / Mixed Methods",
+    "secondary_paradigm": null,
+    "trustworthiness_framework": "JBI Scoping Review Framework",
+    "unit_of_analysis": "Published AI ethics frameworks and guidelines"
+  },
+  "research_questions": [
+    {
+      "id": "RQ1",
+      "required_evidence_type": "Descriptive framework or guideline document",
+      "synthesis_type": "Narrative",
+      "target_facet": "ethical_principles",
+      "text": "What ethical principles are most commonly foregrounded in AI governance frameworks published since 2018?"
+    }
+  ],
+  "search_strategy": {
+    "core_concepts": [
+      {
+        "boolean_operator": "OR",
+        "concept": "AI Ethics",
+        "synonyms": ["algorithmic fairness", "responsible AI", "AI governance", "trustworthy AI"]
+      }
+    ],
+    "date_range": {
+      "end_year": 2026,
+      "start_year": 2018
+    },
+    "languages": ["en"],
+    "open_access_preferred": true,
+    "target_candidate_pool_size": {
+      "max": 1000,
+      "min": 200
+    },
+    "target_databases": ["openalex", "semanticscholar", "crossref", "arxiv"]
+  },
+  "screening_criteria": {
+    "exclusion": [
+      {
+        "criterion": "Grey literature without peer review or institutional endorsement",
+        "id": "EXC-01",
+        "maps_to_rqs": [],
+        "reason_category": "WRONG_SOURCE_TYPE"
+      }
+    ],
+    "inclusion": [
+      {
+        "criterion": "Document explicitly addresses ethical principles or guidelines for AI systems",
+        "id": "INC-01",
+        "maps_to_rqs": ["RQ1"],
+        "reason_category": null
+      }
+    ],
+    "two_tier_screening": true
+  },
+  "matrix_dimensions": [],
+  "verification": {
+    "coi_and_funding_audit_required": true,
+    "minimum_trust_score_threshold": 5.0,
+    "reproducibility_das_cas_check": false,
+    "retraction_check_required": true
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "schemas/v1/protocol.schema.json",
+  "protocol_id": "proto-invalid-enum-paradigm",
+  "created_at": "2026-09-01T00:00:00+00:00",
+  "project_slug": "invalid-test",
+  "playbook_type": "DESIGN_SCIENCE",
+  "metadata": {
+    "lead_researcher": "Tester",
+    "target_venue_type": "Test",
+    "timeline_weeks": 4,
+    "title": "Invalid Paradigm Test"
+  },
+  "epistemology": {
+    "epistemological_rationale": "Testing enum rejection.",
+    "incompatible_concepts": [],
+    "primary_paradigm": "UNKNOWN_PARADIGM_XYZ",
+    "secondary_paradigm": null,
+    "trustworthiness_framework": "None",
+    "unit_of_analysis": "Test unit"
+  },
+  "research_questions": [
+    {
+      "id": "RQ1",
+      "required_evidence_type": "Any",
+      "synthesis_type": "Narrative",
+      "target_facet": "test",
+      "text": "Test question?"
+    }
+  ],
+  "search_strategy": {
+    "core_concepts": [
+      {
+        "boolean_operator": "OR",
+        "concept": "Test",
+        "synonyms": []
+      }
+    ],
+    "date_range": {"end_year": 2026, "start_year": 2020},
+    "languages": ["en"],
+    "open_access_preferred": true,
+    "target_candidate_pool_size": {"max": 100, "min": 10},
+    "target_databases": ["openalex"]
+  },
+  "screening_criteria": {
+    "exclusion": [
+      {"criterion": "Not relevant", "id": "EXC-01", "maps_to_rqs": [], "reason_category": null}
+    ],
+    "inclusion": [
+      {"criterion": "Relevant", "id": "INC-01", "maps_to_rqs": ["RQ1"], "reason_category": null}
+    ],
+    "two_tier_screening": false
+  },
+  "matrix_dimensions": [],
+  "verification": {
+    "coi_and_funding_audit_required": true,
+    "minimum_trust_score_threshold": 5.0,
+    "reproducibility_das_cas_check": true,
+    "retraction_check_required": true
+  }
+}

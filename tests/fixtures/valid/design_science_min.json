@@ -1,0 +1,86 @@
+{
+  "$schema": "schemas/v1/protocol.schema.json",
+  "protocol_id": "proto-20260901-design-science-min",
+  "created_at": "2026-09-01T00:00:00+00:00",
+  "project_slug": "design-science-min",
+  "playbook_type": "DESIGN_SCIENCE",
+  "metadata": {
+    "lead_researcher": "Researcher",
+    "target_venue_type": "IEEE Transactions",
+    "timeline_weeks": 4,
+    "title": "Minimal Design Science Protocol"
+  },
+  "epistemology": {
+    "epistemological_rationale": "Evaluating computational artifacts and their empirical utility justifies a Design Science paradigm.",
+    "incompatible_concepts": [],
+    "primary_paradigm": "Design Science",
+    "secondary_paradigm": null,
+    "trustworthiness_framework": "Hevner DSR",
+    "unit_of_analysis": "Computational artifacts and benchmark test suites"
+  },
+  "research_questions": [
+    {
+      "id": "RQ1",
+      "required_evidence_type": "Quantitative benchmark scores",
+      "synthesis_type": "Comparative Matrix",
+      "target_facet": "evaluation_metrics",
+      "text": "What evaluation metrics are used to assess code generation artifacts?"
+    }
+  ],
+  "search_strategy": {
+    "core_concepts": [
+      {
+        "boolean_operator": "OR",
+        "concept": "Code Generation",
+        "synonyms": ["code synthesis", "program synthesis"]
+      }
+    ],
+    "date_range": {
+      "end_year": 2026,
+      "start_year": 2020
+    },
+    "languages": ["en"],
+    "open_access_preferred": true,
+    "target_candidate_pool_size": {
+      "max": 400,
+      "min": 100
+    },
+    "target_databases": ["openalex", "semanticscholar", "crossref", "arxiv"]
+  },
+  "screening_criteria": {
+    "exclusion": [
+      {
+        "criterion": "Papers with no empirical evaluation of a code artifact",
+        "id": "EXC-01",
+        "maps_to_rqs": ["RQ1"],
+        "reason_category": "NO_EVALUATION"
+      }
+    ],
+    "inclusion": [
+      {
+        "criterion": "Paper presents a computational artifact for code generation",
+        "id": "INC-01",
+        "maps_to_rqs": ["RQ1"],
+        "reason_category": null
+      }
+    ],
+    "two_tier_screening": true
+  },
+  "matrix_dimensions": [
+    {
+      "data_type": "categorical",
+      "description": "Extract the benchmark dataset used to evaluate the artifact.",
+      "fallback_value": "Not Reported",
+      "id": "benchmark_dataset",
+      "name": "Benchmark Dataset",
+      "required": true,
+      "target_section_category": "methodology"
+    }
+  ],
+  "verification": {
+    "coi_and_funding_audit_required": true,
+    "minimum_trust_score_threshold": 5.0,
+    "reproducibility_das_cas_check": true,
+    "retraction_check_required": true
+  }
+}

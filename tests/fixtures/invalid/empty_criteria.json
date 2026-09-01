@@ -1,0 +1,56 @@
+{
+  "$schema": "schemas/v1/protocol.schema.json",
+  "protocol_id": "proto-invalid-empty-criteria",
+  "created_at": "2026-09-01T00:00:00+00:00",
+  "project_slug": "invalid-empty-criteria-test",
+  "playbook_type": "PRISMA_SLR",
+  "metadata": {
+    "lead_researcher": "Tester",
+    "target_venue_type": "Test",
+    "timeline_weeks": 4,
+    "title": "Empty Criteria Test"
+  },
+  "epistemology": {
+    "epistemological_rationale": "Testing min_length validation on criteria lists.",
+    "incompatible_concepts": [],
+    "primary_paradigm": "Positivist",
+    "secondary_paradigm": null,
+    "trustworthiness_framework": "PRISMA 2020",
+    "unit_of_analysis": "Test unit"
+  },
+  "research_questions": [
+    {
+      "id": "RQ1",
+      "required_evidence_type": "Any",
+      "synthesis_type": "Comparative Matrix",
+      "target_facet": "test",
+      "text": "Valid research question?"
+    }
+  ],
+  "search_strategy": {
+    "core_concepts": [
+      {
+        "boolean_operator": "OR",
+        "concept": "Test",
+        "synonyms": []
+      }
+    ],
+    "date_range": {"end_year": 2026, "start_year": 2020},
+    "languages": ["en"],
+    "open_access_preferred": true,
+    "target_candidate_pool_size": {"max": 100, "min": 10},
+    "target_databases": ["openalex"]
+  },
+  "screening_criteria": {
+    "exclusion": [],
+    "inclusion": [],
+    "two_tier_screening": true
+  },
+  "matrix_dimensions": [],
+  "verification": {
+    "coi_and_funding_audit_required": true,
+    "minimum_trust_score_threshold": 5.0,
+    "reproducibility_das_cas_check": true,
+    "retraction_check_required": true
+  }
+}

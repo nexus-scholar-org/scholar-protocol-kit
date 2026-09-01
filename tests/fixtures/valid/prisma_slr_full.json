@@ -1,0 +1,161 @@
+{
+  "$schema": "schemas/v1/protocol.schema.json",
+  "protocol_id": "proto-20260901-prisma-slr-full",
+  "created_at": "2026-09-01T00:00:00+00:00",
+  "project_slug": "llm-code-benchmarks",
+  "playbook_type": "PRISMA_SLR",
+  "metadata": {
+    "lead_researcher": "Researcher",
+    "target_venue_type": "ACM / IEEE Transactions",
+    "timeline_weeks": 12,
+    "title": "Benchmarking Large Language Models in Code Generation: A Systematic Review"
+  },
+  "epistemology": {
+    "epistemological_rationale": "Statistical generalisability of benchmark performance across models requires a Positivist stance with quantitative evidence.",
+    "incompatible_concepts": ["Qualitative opinion surveys without code evaluation"],
+    "primary_paradigm": "Positivist",
+    "secondary_paradigm": null,
+    "trustworthiness_framework": "PRISMA 2020",
+    "unit_of_analysis": "Peer-reviewed empirical studies of LLM code generation"
+  },
+  "research_questions": [
+    {
+      "id": "RQ1",
+      "required_evidence_type": "Quantitative benchmark scores (pass@k, execution accuracy)",
+      "synthesis_type": "Comparative Matrix",
+      "target_facet": "evaluation_metrics",
+      "text": "What automated benchmarks are used in the literature to measure LLM code generation pass rates?"
+    },
+    {
+      "id": "RQ2",
+      "required_evidence_type": "Ablation delta tables and latency measurements",
+      "synthesis_type": "Comparative Matrix",
+      "target_facet": "empirical_benchmark",
+      "text": "What is the measured performance difference between dense retrieval and graph-boosted RAG for code synthesis?"
+    },
+    {
+      "id": "RQ3",
+      "required_evidence_type": "Reported limitations and threats to validity",
+      "synthesis_type": "Narrative",
+      "target_facet": "limitations",
+      "text": "What limitations and threats to validity are most commonly reported in LLM code generation benchmarking studies?"
+    }
+  ],
+  "search_strategy": {
+    "core_concepts": [
+      {
+        "boolean_operator": "OR",
+        "concept": "Large Language Model Code Generation",
+        "synonyms": ["neural code synthesis", "LLM code completion", "Copilot", "code LLMs"]
+      },
+      {
+        "boolean_operator": "OR",
+        "concept": "Benchmark Evaluation",
+        "synonyms": ["HumanEval", "MBPP", "pass@1", "execution accuracy", "ablation study"]
+      },
+      {
+        "boolean_operator": "OR",
+        "concept": "Retrieval-Augmented Generation",
+        "synonyms": ["RAG", "dense retrieval", "graph RAG", "code RAG"]
+      }
+    ],
+    "date_range": {
+      "end_year": 2026,
+      "start_year": 2021
+    },
+    "languages": ["en"],
+    "open_access_preferred": true,
+    "target_candidate_pool_size": {
+      "max": 2000,
+      "min": 500
+    },
+    "target_databases": ["arxiv", "semanticscholar", "crossref", "openalex"]
+  },
+  "screening_criteria": {
+    "exclusion": [
+      {
+        "criterion": "Position papers or non-peer-reviewed blog posts without empirical code evaluation",
+        "id": "EXC-01",
+        "maps_to_rqs": ["RQ1", "RQ2"],
+        "reason_category": "NO_EVALUATION"
+      },
+      {
+        "criterion": "Studies focusing purely on natural language translation without code execution",
+        "id": "EXC-02",
+        "maps_to_rqs": ["RQ1"],
+        "reason_category": "WRONG_OUTCOME"
+      },
+      {
+        "criterion": "Papers published before 2021",
+        "id": "EXC-03",
+        "maps_to_rqs": [],
+        "reason_category": "OUT_OF_DATE_RANGE"
+      }
+    ],
+    "inclusion": [
+      {
+        "criterion": "Presents a novel computational model, prompt architecture, or RAG pipeline for code generation",
+        "id": "INC-01",
+        "maps_to_rqs": ["RQ1"],
+        "reason_category": null
+      },
+      {
+        "criterion": "Evaluates performance quantitatively against public standard benchmark datasets",
+        "id": "INC-02",
+        "maps_to_rqs": ["RQ1", "RQ2"],
+        "reason_category": null
+      },
+      {
+        "criterion": "Reports at least one limitation or threat to validity",
+        "id": "INC-03",
+        "maps_to_rqs": ["RQ3"],
+        "reason_category": null
+      }
+    ],
+    "two_tier_screening": true
+  },
+  "matrix_dimensions": [
+    {
+      "data_type": "categorical",
+      "description": "Extract foundation model name and parameter size (e.g. Llama-3-70B, GPT-4o, DeepSeek-Coder).",
+      "fallback_value": "Not Reported",
+      "id": "model_arch",
+      "name": "Model Architecture & Parameters",
+      "required": true,
+      "target_section_category": "methodology"
+    },
+    {
+      "data_type": "list",
+      "description": "Extract specific test suites used (HumanEval, MBPP, SWE-bench, DS-1000).",
+      "fallback_value": "Not Reported",
+      "id": "benchmark_datasets",
+      "name": "Benchmark Dataset(s)",
+      "required": true,
+      "target_section_category": "methodology"
+    },
+    {
+      "data_type": "numeric",
+      "description": "Extract numerical pass@1 or unit test pass percentages reported.",
+      "fallback_value": "Not Reported",
+      "id": "pass_k_accuracy",
+      "name": "pass@1 / Execution Accuracy",
+      "required": true,
+      "target_section_category": "results_empirical"
+    },
+    {
+      "data_type": "free_text",
+      "description": "Extract engineering constraints, compute requirements, or index latency.",
+      "fallback_value": "Not Reported",
+      "id": "declared_limitations",
+      "name": "Declared Limitations & Latency",
+      "required": false,
+      "target_section_category": "discussion_limitations"
+    }
+  ],
+  "verification": {
+    "coi_and_funding_audit_required": true,
+    "minimum_trust_score_threshold": 6.0,
+    "reproducibility_das_cas_check": true,
+    "retraction_check_required": true
+  }
+}

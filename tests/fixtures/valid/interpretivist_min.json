@@ -1,0 +1,137 @@
+{
+  "$schema": "schemas/v1/protocol.schema.json",
+  "protocol_id": "proto-20260901-interpretivist-min",
+  "created_at": "2026-09-01T00:00:00+00:00",
+  "project_slug": "developer-experience-qualitative",
+  "playbook_type": "SCOPING_REVIEW",
+  "metadata": {
+    "lead_researcher": "Researcher",
+    "target_venue_type": "CHI / CSCW",
+    "timeline_weeks": 8,
+    "title": "Developer Experience with AI Pair Programmers: An Interpretivist Scoping Review"
+  },
+  "epistemology": {
+    "epistemological_rationale": "Human meaning-making, lived experience, and socio-technical context are best examined through an interpretivist lens drawing on thematic and discourse analysis.",
+    "incompatible_concepts": ["statistical significance", "p-value", "randomised controlled trial"],
+    "primary_paradigm": "Interpretivist",
+    "secondary_paradigm": null,
+    "trustworthiness_framework": "Lincoln & Guba Trustworthiness Criteria",
+    "unit_of_analysis": "Developer narratives, interviews, and observational studies"
+  },
+  "research_questions": [
+    {
+      "id": "RQ1",
+      "required_evidence_type": "Verbatim interview excerpts or observational field notes",
+      "synthesis_type": "Taxonomy",
+      "target_facet": "perceived_utility",
+      "text": "How do software developers describe their experience of trust and perceived utility when pair programming with AI tools?"
+    },
+    {
+      "id": "RQ2",
+      "required_evidence_type": "Coded themes from qualitative data",
+      "synthesis_type": "Narrative",
+      "target_facet": "barriers_adoption",
+      "text": "What socio-technical barriers to adoption of AI coding assistants are identified in qualitative studies?"
+    }
+  ],
+  "search_strategy": {
+    "core_concepts": [
+      {
+        "boolean_operator": "OR",
+        "concept": "Developer Experience AI Tools",
+        "synonyms": ["AI pair programming", "Copilot user study", "AI coding assistant UX", "developer perception LLM"]
+      },
+      {
+        "boolean_operator": "OR",
+        "concept": "Qualitative Software Engineering Research",
+        "synonyms": ["thematic analysis", "grounded theory", "interview study", "ethnography"]
+      }
+    ],
+    "date_range": {
+      "end_year": 2026,
+      "start_year": 2020
+    },
+    "languages": ["en"],
+    "open_access_preferred": true,
+    "target_candidate_pool_size": {
+      "max": 600,
+      "min": 80
+    },
+    "target_databases": ["openalex", "semanticscholar", "crossref", "arxiv"]
+  },
+  "screening_criteria": {
+    "exclusion": [
+      {
+        "criterion": "Studies reporting only quantitative benchmark scores with no qualitative component",
+        "id": "EXC-01",
+        "maps_to_rqs": ["RQ1", "RQ2"],
+        "reason_category": "WRONG_METHOD"
+      },
+      {
+        "criterion": "Studies not involving human participants (pure model evaluation papers)",
+        "id": "EXC-02",
+        "maps_to_rqs": ["RQ1"],
+        "reason_category": "WRONG_POPULATION"
+      }
+    ],
+    "inclusion": [
+      {
+        "criterion": "Involves human participants using an AI coding assistant in a real or simulated development task",
+        "id": "INC-01",
+        "maps_to_rqs": ["RQ1", "RQ2"],
+        "reason_category": null
+      },
+      {
+        "criterion": "Uses a qualitative or mixed-methods design (interviews, observation, think-aloud, diary study)",
+        "id": "INC-02",
+        "maps_to_rqs": ["RQ1", "RQ2"],
+        "reason_category": null
+      }
+    ],
+    "two_tier_screening": false
+  },
+  "matrix_dimensions": [
+    {
+      "data_type": "categorical",
+      "description": "Extract study methodology type (e.g. semi-structured interview, ethnography, diary study, think-aloud).",
+      "fallback_value": "Not Reported",
+      "id": "study_method",
+      "name": "Qualitative Study Method",
+      "required": true,
+      "target_section_category": "methodology"
+    },
+    {
+      "data_type": "numeric",
+      "description": "Extract number of participants in the study.",
+      "fallback_value": "Not Reported",
+      "id": "participant_count",
+      "name": "Participant Count (N)",
+      "required": true,
+      "target_section_category": "methodology"
+    },
+    {
+      "data_type": "list",
+      "description": "Extract the named themes or codes reported by the authors.",
+      "fallback_value": "Not Reported",
+      "id": "identified_themes",
+      "name": "Identified Themes / Codes",
+      "required": false,
+      "target_section_category": "results_empirical"
+    },
+    {
+      "data_type": "free_text",
+      "description": "Extract the declared transferability or trustworthiness claims of the authors.",
+      "fallback_value": "Not Reported",
+      "id": "transferability",
+      "name": "Transferability / Trustworthiness Statement",
+      "required": false,
+      "target_section_category": "discussion_limitations"
+    }
+  ],
+  "verification": {
+    "coi_and_funding_audit_required": true,
+    "minimum_trust_score_threshold": 5.0,
+    "reproducibility_das_cas_check": false,
+    "retraction_check_required": true
+  }
+}
