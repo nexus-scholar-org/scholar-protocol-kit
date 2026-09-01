@@ -24,6 +24,14 @@ scholar-protocol compile <intent_path>
 scholar-protocol render-criteria <path>
     Render a valid protocol.json into a Markdown SCREENING_CRITERIA.md document.
     Outputs to stdout. Exit 0 = success. Exit 2 = read/parse failure.
+
+scholar-protocol extraction-schema <path>
+    Generate the JSON Schema for matrix dimension row extraction.
+    Outputs to stdout. Exit 0 = success. Exit 2 = read/parse failure.
+
+scholar-protocol extraction-prompt <path>
+    Generate the Markdown prompt instructions for matrix dimension extraction.
+    Outputs to stdout. Exit 0 = success. Exit 2 = read/parse failure.
 """
 
 from __future__ import annotations
@@ -42,6 +50,8 @@ from scholar_protocol.models import ResearchProtocol
 from scholar_protocol.validate import validate_protocol
 from scholar_protocol.compiler import compile_from_file
 from scholar_protocol.render import render_screening_criteria
+from scholar_protocol.extraction import build_extraction_model, generate_extraction_prompt
+import json
 
 app = typer.Typer(
     name="scholar-protocol",
@@ -187,6 +197,44 @@ def render_criteria(
     protocol = _load_protocol(path)
     md = render_screening_criteria(protocol)
     print(md)
+
+
+@app.command()
+def extraction_schema(
+    path: pathlib.Path = typer.Argument(..., help="Path to protocol.json"),
+) -> None:
+    """Generate the JSON Schema for matrix dimension row extraction.
+
+    Outputs the raw JSON Schema to stdout.
+    """
+    if not path.exists():
+        console.print(f"[bold red]Error:[/] File not found: {path}")
+        raise typer.Exit(2)
+
+    protocol = _load_protocol(path)
+    model = build_extraction_model(protocol)
+    # output the JSON schema
+    schema = model.model_json_schema()
+    # Pydantic schema doesn't guarantee stable field ordering in all versions,
+    # but we just dump it as json.
+    print(json.dumps(schema, indent=2))
+
+
+@app.command()
+def extraction_prompt(
+    path: pathlib.Path = typer.Argument(..., help="Path to protocol.json"),
+) -> None:
+    """Generate the Markdown prompt instructions for matrix dimension extraction.
+
+    Outputs the markdown prompt to stdout.
+    """
+    if not path.exists():
+        console.print(f"[bold red]Error:[/] File not found: {path}")
+        raise typer.Exit(2)
+
+    protocol = _load_protocol(path)
+    prompt = generate_extraction_prompt(protocol)
+    print(prompt)
 
 
 if __name__ == "__main__":

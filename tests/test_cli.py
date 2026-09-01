@@ -222,3 +222,40 @@ def test_render_criteria_nonexistent_exit_2() -> None:
     assert result.returncode == 2
 
 
+# ---------------------------------------------------------------------------
+# scholar-protocol extraction-schema and extraction-prompt
+# ---------------------------------------------------------------------------
+
+
+def test_extraction_schema_output_is_json() -> None:
+    """extraction-schema must output valid JSON Schema."""
+    result = run("extraction-schema", str(VALID_DIR / "design_science_min.json"))
+    assert result.returncode == 0
+    parsed = json.loads(result.stdout)
+    assert "type" in parsed
+    assert "properties" in parsed
+    # Check that benchmark_dataset dimension exists
+    assert "benchmark_dataset" in parsed["properties"]
+
+
+def test_extraction_schema_nonexistent_exit_2() -> None:
+    """extraction-schema on a missing file must exit with code 2."""
+    result = run("extraction-schema", _MISSING)
+    assert result.returncode == 2
+
+
+def test_extraction_prompt_output_is_markdown() -> None:
+    """extraction-prompt must output expected markdown guidelines."""
+    result = run("extraction-prompt", str(VALID_DIR / "design_science_min.json"))
+    assert result.returncode == 0
+    assert "### Extraction Guidelines" in result.stdout
+    assert "#### `benchmark_dataset`: Benchmark Dataset" in result.stdout
+
+
+def test_extraction_prompt_nonexistent_exit_2() -> None:
+    """extraction-prompt on a missing file must exit with code 2."""
+    result = run("extraction-prompt", _MISSING)
+    assert result.returncode == 2
+
+
+
