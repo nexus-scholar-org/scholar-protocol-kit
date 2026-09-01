@@ -1,6 +1,6 @@
 # scholar-protocol-kit
 
-> **Phase 0 — Cycle A** of the Nexus Scholar harness.  
+> **Phase 0** of the Nexus Scholar harness.  
 > Pure Python. Zero LLM. Zero network. Fully deterministic.
 
 ## What this kit does
@@ -12,7 +12,10 @@ It provides:
 1. **Pydantic v2 models** (`models.py`) — the sole runtime source of truth for `protocol.json`.
 2. **Canonical serializer** (`canonical.py`) — deterministic JSON bytes + `sha256` fingerprint.
 3. **Validation engine** (`validate.py`) — structural (Pydantic) + cross-field rules.
-4. **CLI** (`cli.py`) — `scholar-protocol validate / fingerprint / canon`.
+4. **Compiler** (`compile.py`) — resolves Socratic `IntentPackets` into full canonical protocols.
+5. **Renderer** (`render.py`) — generates markdown PRISMA `SCREENING_CRITERIA.md`.
+6. **Extraction API** (`extraction.py`) — dynamic Pydantic schema generation for RAG consumption.
+7. **CLI** (`cli.py`) — complete terminal interface for the pipeline.
 
 Every downstream kit (`scholar-search-kit`, `scholar-rag-kit`, Phase 4 Trust) reads `protocol.json` validated by this kit.
 
@@ -40,9 +43,20 @@ scholar-protocol validate workspaces/my-project/protocol.json
 # Strict mode: warnings become errors
 scholar-protocol validate --strict workspaces/my-project/protocol.json
 
+# Compile an LLM-generated intent.json into a canonical protocol.json
+scholar-protocol compile workspaces/my-project/intent.json > workspaces/my-project/protocol.json
+
+# Render screening criteria for human and LLM review
+scholar-protocol render-criteria workspaces/my-project/protocol.json > workspaces/my-project/SCREENING_CRITERIA.md
+
+# Generate a strict JSON Schema for RAG data extraction based on matrix dimensions
+scholar-protocol extraction-schema workspaces/my-project/protocol.json > extraction_schema.json
+
+# Generate extraction prompt instructions
+scholar-protocol extraction-prompt workspaces/my-project/protocol.json
+
 # Print the canonical sha256 fingerprint
 scholar-protocol fingerprint workspaces/my-project/protocol.json
-# Output: sha256:a3f9...
 
 # Print canonical JSON bytes (for diffing generator output)
 scholar-protocol canon workspaces/my-project/protocol.json | diff - golden.json
@@ -55,9 +69,13 @@ scholar-protocol canon workspaces/my-project/protocol.json | diff - golden.json
 ```python
 from scholar_protocol import (
     ResearchProtocol,
+    IntentPacket,
     validate_protocol,
+    compile_protocol,
     canonical_json,
     canonical_fingerprint,
+    render_screening_criteria,
+    build_extraction_model,
 )
 
 # Parse and validate
@@ -66,10 +84,20 @@ if not report.is_valid:
     for err in report.errors:
         print(err)
 
+# Compile intent
+intent = IntentPacket.model_validate_json(open("intent.json").read())
+protocol = compile_protocol(intent)
+
 # Get canonical bytes and fingerprint
-protocol = ResearchProtocol.model_validate_json(open("protocol.json").read())
 fp = canonical_fingerprint(protocol)   # "sha256:a3f9..."
 raw = canonical_json(protocol)         # b'{"$schema":...}'
+
+# Render criteria
+criteria_md = render_screening_criteria(protocol)
+
+# Build dynamic extraction model
+ExtractionModel = build_extraction_model(protocol)
+schema = ExtractionModel.model_json_schema()
 ```
 
 ---
@@ -121,6 +149,10 @@ scholar-protocol-kit/
 │   ├── models.py         # Pydantic v2 models (sole source of truth)
 │   ├── canonical.py      # Deterministic serializer + sha256 fingerprint
 │   ├── validate.py       # Structural + cross-field validation
+│   ├── compile.py        # Resolves IntentPacket to canonical protocol
+│   ├── render.py         # Markdown criteria generator
+│   ├── extraction.py     # Dynamic Pydantic schema synthesis
+│   ├── playbook.py       # Presets and configuration logic
 │   └── cli.py            # Typer + Rich CLI
 ├── schemas/
 │   └── v1/
