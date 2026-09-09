@@ -46,12 +46,19 @@ from rich.panel import Panel
 from rich.text import Text
 
 from scholar_protocol.canonical import canonical_fingerprint, canonical_json
-from scholar_protocol.models import ResearchProtocol
-from scholar_protocol.validate import validate_protocol
 from scholar_protocol.compiler import compile_from_file
-from scholar_protocol.render import render_screening_criteria
 from scholar_protocol.extraction import build_extraction_model, generate_extraction_prompt
-import json
+from scholar_protocol.models import ResearchProtocol
+from scholar_protocol.render import render_screening_criteria
+from scholar_protocol.validate import validate_protocol
+
+# Force UTF-8 on Windows to prevent console encoding crashes on OEM code pages
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 app = typer.Typer(
     name="scholar-protocol",
