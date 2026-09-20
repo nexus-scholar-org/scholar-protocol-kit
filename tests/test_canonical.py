@@ -88,6 +88,25 @@ def test_pinned_canonical_fixture_fingerprint() -> None:
     )
 
 
+def test_pinned_canonical_identity_base_fingerprint() -> None:
+    """canonical/identity_base.json must match its .sha256 sibling."""
+    fixture_path = CANONICAL_DIR / "identity_base.json"
+    sha256_path = CANONICAL_DIR / "identity_base.json.sha256"
+
+    assert sha256_path.exists(), f".sha256 sibling not found at {sha256_path}"
+
+    protocol = _load_protocol(fixture_path)
+    actual = canonical_fingerprint(protocol)
+    expected = _read_expected_fingerprint(sha256_path)
+
+    assert actual == expected, (
+        f"Fingerprint mismatch for canonical/identity_base.json!\n"
+        f"  Expected: {expected}\n"
+        f"  Actual:   {actual}"
+    )
+
+
+
 # ---------------------------------------------------------------------------
 # Idempotency: canon(canon(x)) == canon(x)
 # ---------------------------------------------------------------------------

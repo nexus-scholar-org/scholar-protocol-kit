@@ -44,7 +44,7 @@ from __future__ import annotations
 import json
 import pathlib
 from dataclasses import dataclass, field
-from typing import List
+from typing import Any, List
 
 from pydantic import ValidationError
 
@@ -177,6 +177,7 @@ def _check_cross_field(protocol: ResearchProtocol, report: ValidationReport) -> 
 
     # --- date_range coherence ------------------------------------------------
     import datetime as dt
+
     current_year = dt.datetime.now(dt.timezone.utc).year
     dr = protocol.search_strategy.date_range
     start = dr.get("start_year")
@@ -279,6 +280,103 @@ def _check_cross_field(protocol: ResearchProtocol, report: ValidationReport) -> 
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# PRISMA 2020 Compliance Scoring
+# ---------------------------------------------------------------------------
+
+
+def prisma_compliance(protocol: ResearchProtocol) -> dict[str, Any]:
+    """Score a ResearchProtocol against the PRISMA 2020 checklist.
+
+    Returns a dict with:
+    - total_items: total checklist items
+    - addressed_items: items that pass
+    - compliance_score: float 0.0–1.0
+    - sections: dict mapping section name to list of {id, description, addressed}
+    """
+    _check_fns: dict[str, list[tuple[str, Any, str]]] = {
+        "TITLE": [
+            ("1.1", lambda p: bool(p.metadata.get("title")), "Protocol has a title"),
+            ("1.2", lambda p: bool(p.research_questions), "Research questions defined"),
+        ],
+        "ABSTRACT": [
+            ("2.1", lambda p: bool(p.metadata.get("title")), "Title present in abstract"),
+        ],
+        "INTRODUCTION": [
+            (
+                "3.1",
+                lambda p: bool(p.epistemology.epistemological_rationale),
+                "Epistemological rationale provided",
+            ),
+            ("3.2", lambda p: bool(p.research_questions), "Research questions stated"),
+        ],
+        "METHODS": [
+            ("4.1", lambda p: bool(p.screening_criteria.inclusion), "Inclusion criteria defined"),
+            ("4.2", lambda p: bool(p.screening_criteria.exclusion), "Exclusion criteria defined"),
+            (
+                "4.3",
+                lambda p: bool(p.search_strategy.core_concepts),
+                "Search strategy / core concepts defined",
+            ),
+            (
+                "4.4",
+                lambda p: bool(p.search_strategy.target_databases),
+                "Target databases specified",
+            ),
+            ("4.5", lambda p: bool(p.search_strategy.date_range), "Date range specified"),
+            ("4.6", lambda p: bool(p.matrix_dimensions), "Matrix dimensions defined"),
+            ("4.7", lambda p: p.verification.retraction_check_required, "Retraction check enabled"),
+            (
+                "4.8",
+                lambda p: p.verification.coi_and_funding_audit_required,
+                "COI/funding audit enabled",
+            ),
+        ],
+        "RESULTS": [
+            ("5.1", lambda p: False, "Study selection results (requires execution)"),
+            ("5.2", lambda p: False, "Exclusion reasons documented (requires execution)"),
+            ("5.3", lambda p: False, "PRISMA flow diagram (requires execution)"),
+            ("5.4", lambda p: False, "Evidence table (requires execution)"),
+        ],
+        "DISCUSSION": [
+            ("6.1", lambda p: False, "Synthesis findings (requires execution)"),
+            ("6.2", lambda p: False, "Limitations (requires execution)"),
+        ],
+        "OTHER": [
+            ("7.1", lambda p: bool(p.metadata.get("funding")), "Funding source declared"),
+        ],
+    }
+
+    sections: dict[str, list[dict[str, Any]]] = {}
+    total_items = 0
+    addressed_items = 0
+
+    for section_name, checks in _check_fns.items():
+        section_items = []
+        for item_id, check_fn, description in checks:
+            result = bool(check_fn(protocol))
+            section_items.append(
+                {
+                    "id": item_id,
+                    "description": description,
+                    "addressed": result,
+                }
+            )
+            total_items += 1
+            if result:
+                addressed_items += 1
+        sections[section_name] = section_items
+
+    compliance_score = addressed_items / total_items if total_items > 0 else 0.0
+
+    return {
+        "total_items": total_items,
+        "addressed_items": addressed_items,
+        "compliance_score": compliance_score,
+        "sections": sections,
+    }
 
 
 def validate_protocol(path: str | pathlib.Path) -> ValidationReport:

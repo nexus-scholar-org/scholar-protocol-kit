@@ -32,6 +32,10 @@ scholar-protocol extraction-schema <path>
 scholar-protocol extraction-prompt <path>
     Generate the Markdown prompt instructions for matrix dimension extraction.
     Outputs to stdout. Exit 0 = success. Exit 2 = read/parse failure.
+
+scholar-protocol prisma-check <path> [--json]
+    Check a protocol against the PRISMA 2020 compliance checklist.
+    Exit 0 = success.  Exit 2 = read/parse failure.
 """
 
 from __future__ import annotations
@@ -244,5 +248,76 @@ def extraction_prompt(
     print(prompt)
 
 
+@app.command("prisma-check")
+def prisma_check(
+    path: pathlib.Path = typer.Argument(..., help="Path to protocol.json"),
+    json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
+) -> None:
+    """Check a protocol against the PRISMA 2020 compliance checklist."""
+    if not path.exists():
+        console.print(f"[bold red]Error:[/] File not found: {path}")
+        raise typer.Exit(2)
+
+    from scholar_protocol.validate import prisma_compliance
+
+    protocol = _load_protocol(path)
+    result = prisma_compliance(protocol)
+
+    if json_output:
+        import json as _json
+
+        print(_json.dumps(result, indent=2))
+    else:
+        from rich.table import Table
+
+        score_pct = result["compliance_score"] * 100
+        table = Table(title=f"PRISMA 2020 Compliance ({path.name})")
+        table.add_column("Item", style="cyan")
+        table.add_column("Description", style="white")
+        table.add_column("Status", justify="center")
+
+        for section_name, items in result["sections"].items():
+            table.add_row(f"[bold]{section_name}[/bold]", "", "")
+            for item in items:
+                status = "\u2705" if item["addressed"] else "\u274c"
+                table.add_row(item["id"], item["description"], status)
+
+        console.print(table)
+        console.print(
+            f"\n[bold]Overall compliance:[/] {score_pct:.0f}% "
+            f"({result['addressed_items']}/{result['total_items']} items)"
+        )
+
+
+@app.command("identity")
+def identity(
+    path: pathlib.Path = typer.Argument(..., help="Path to protocol.json"),
+    json_output: bool = typer.Option(False, "--json", help="Output identity as JSON"),
+) -> None:
+    """Extract protocol identity, PRT-* ID, canonical fingerprint, and producer provenance."""
+    if not path.exists():
+        console.print(f"[bold red]Error:[/] File not found: {path}")
+        raise typer.Exit(2)
+
+    from scholar_protocol.identity import get_protocol_identity
+
+    try:
+        ident = get_protocol_identity(path)
+    except Exception as exc:
+        console.print(f"[bold red]Error:[/] Failed to resolve protocol identity: {exc}")
+        raise typer.Exit(2) from exc
+
+    if json_output:
+        print(json.dumps(ident.to_dict(), indent=2))
+    else:
+        print(f"protocol_id: {ident.protocol_id}")
+        print(f"protocol_fingerprint: {ident.protocol_fingerprint}")
+        print(f"schema_version: {ident.schema_version}")
+        print(
+            f"producer: {ident.producer.package}@{ident.producer.version} ({ident.producer.commit})"
+        )
+
+
 if __name__ == "__main__":
     app()
+

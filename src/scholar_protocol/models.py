@@ -110,9 +110,7 @@ class ConceptCluster(BaseModel):
         default_factory=list,
         description="Alternative keyword synonyms (author order preserved)",
     )
-    boolean_operator: str = Field(
-        "OR", description="Operator joining synonyms: 'OR' or 'AND'"
-    )
+    boolean_operator: str = Field("OR", description="Operator joining synonyms: 'OR' or 'AND'")
 
 
 class SearchStrategy(BaseModel):
@@ -144,6 +142,10 @@ class SearchStrategy(BaseModel):
     target_candidate_pool_size: Dict[str, int] = Field(
         default_factory=lambda: {"min": 500, "max": 2000},
         description="Expected size of the initial candidate pool (min <= max)",
+    )
+    golden_seeds: list[str] = Field(
+        default_factory=list,
+        description="DOIs of 2-5 landmark papers that must appear in search results",
     )
 
 

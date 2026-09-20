@@ -18,9 +18,7 @@ CANONICAL_DIR = FIXTURES / "canonical"
 
 def _write_tmp(data: dict) -> pathlib.Path:
     """Write a dict as JSON to a temp file and return the path."""
-    f = tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False, encoding="utf-8"
-    )
+    f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8")
     json.dump(data, f, ensure_ascii=True)
     f.close()
     return pathlib.Path(f.name)
@@ -81,9 +79,7 @@ def test_bad_rq_ref_gives_cross_field_error() -> None:
     report = validate_protocol(INVALID_DIR / "bad_rq_ref.json")
     assert not report.is_valid
     error_codes = [f.code for f in report.errors]
-    assert "CROSS_FIELD_RQ_REF" in error_codes, (
-        f"Expected CROSS_FIELD_RQ_REF, got: {error_codes}"
-    )
+    assert "CROSS_FIELD_RQ_REF" in error_codes, f"Expected CROSS_FIELD_RQ_REF, got: {error_codes}"
 
 
 def test_empty_criteria_gives_structural_error() -> None:
@@ -227,7 +223,7 @@ def test_strict_mode_with_warnings_fails() -> None:
     base = _load(VALID_DIR / "scoping_empty_matrix.json")  # has WARN_NO_MATRIX_DIMS
     tmp = _write_tmp(base)
     report = validate_protocol(tmp)
-    assert report.is_valid             # passes normal validation
+    assert report.is_valid  # passes normal validation
     assert not report.is_valid_strict()  # fails strict
 
 
@@ -257,11 +253,163 @@ def test_nonexistent_file_gives_structural_error() -> None:
 
 def test_bad_json_gives_structural_error() -> None:
     """Malformed JSON must produce a STRUCTURAL error."""
-    f = tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False, encoding="utf-8"
-    )
+    f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8")
     f.write("{not valid json")
     f.close()
     report = validate_protocol(f.name)
     assert not report.is_valid
     assert any(f.code == "STRUCTURAL" for f in report.errors)
+
+
+# ---------------------------------------------------------------------------
+# E3: PRISMA compliance scoring
+# ---------------------------------------------------------------------------
+
+
+def test_prisma_compliance_full_protocol():
+    """prisma_slr_full.json should have high compliance score."""
+    from scholar_protocol.models import ResearchProtocol
+    from scholar_protocol.validate import prisma_compliance
+
+    data = _load(VALID_DIR / "prisma_slr_full.json")
+    protocol = ResearchProtocol.model_validate(data)
+    result = prisma_compliance(protocol)
+
+    assert result["total_items"] > 0
+    assert result["addressed_items"] >= 0
+    assert 0.0 <= result["compliance_score"] <= 1.0
+    assert result["addressed_items"] <= result["total_items"]
+    # Full protocol should score well
+    assert result["compliance_score"] >= 0.5
+
+
+def test_prisma_compliance_min_protocol():
+    """design_science_min.json should still score above 0."""
+    from scholar_protocol.models import ResearchProtocol
+    from scholar_protocol.validate import prisma_compliance
+
+    data = _load(VALID_DIR / "design_science_min.json")
+    protocol = ResearchProtocol.model_validate(data)
+    result = prisma_compliance(protocol)
+
+    assert result["compliance_score"] > 0
+
+
+def test_prisma_compliance_returns_all_sections():
+    """All 7 PRISMA sections should be present."""
+    from scholar_protocol.models import ResearchProtocol
+    from scholar_protocol.validate import prisma_compliance
+
+    data = _load(VALID_DIR / "design_science_min.json")
+    protocol = ResearchProtocol.model_validate(data)
+    result = prisma_compliance(protocol)
+
+    expected_sections = {
+        "TITLE",
+        "ABSTRACT",
+        "INTRODUCTION",
+        "METHODS",
+        "RESULTS",
+        "DISCUSSION",
+        "OTHER",
+    }
+    assert set(result["sections"].keys()) == expected_sections
+
+
+def test_prisma_compliance_results_are_todo():
+    """RESULTS section items should always be addressed=False."""
+    from scholar_protocol.models import ResearchProtocol
+    from scholar_protocol.validate import prisma_compliance
+
+    data = _load(VALID_DIR / "prisma_slr_full.json")
+    protocol = ResearchProtocol.model_validate(data)
+    result = prisma_compliance(protocol)
+
+    for item in result["sections"]["RESULTS"]:
+        assert item["addressed"] is False
+
+
+def test_prisma_compliance_discussion_are_todo():
+    """DISCUSSION section items should always be addressed=False."""
+    from scholar_protocol.models import ResearchProtocol
+    from scholar_protocol.validate import prisma_compliance
+
+    data = _load(VALID_DIR / "prisma_slr_full.json")
+    protocol = ResearchProtocol.model_validate(data)
+    result = prisma_compliance(protocol)
+
+    for item in result["sections"]["DISCUSSION"]:
+        assert item["addressed"] is False
+
+
+def test_prisma_compliance_score_range():
+    """Compliance score must be between 0.0 and 1.0."""
+    from scholar_protocol.models import ResearchProtocol
+    from scholar_protocol.validate import prisma_compliance
+
+    for fixture in ["design_science_min.json", "prisma_slr_full.json", "interpretivist_min.json"]:
+        data = _load(VALID_DIR / fixture)
+        protocol = ResearchProtocol.model_validate(data)
+        result = prisma_compliance(protocol)
+        assert 0.0 <= result["compliance_score"] <= 1.0, f"{fixture} score out of range"
+
+
+def test_prisma_compliance_total_equals_sum():
+    """total_items should match sum of all section items."""
+    from scholar_protocol.models import ResearchProtocol
+    from scholar_protocol.validate import prisma_compliance
+
+    data = _load(VALID_DIR / "prisma_slr_full.json")
+    protocol = ResearchProtocol.model_validate(data)
+    result = prisma_compliance(protocol)
+
+    sum_items = sum(len(items) for items in result["sections"].values())
+    assert result["total_items"] == sum_items
+
+
+def test_prisma_check_cli():
+    """prisma-check CLI with valid fixture exits 0."""
+    from typer.testing import CliRunner
+
+    from scholar_protocol.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        ["prisma-check", str(VALID_DIR / "prisma_slr_full.json")],
+    )
+    assert result.exit_code == 0
+    # Rich Console outputs to stderr in this CLI; just verify exit code 0 (success)
+
+
+def test_prisma_check_cli_json():
+    """prisma-check CLI with --json outputs valid JSON."""
+    from typer.testing import CliRunner
+
+    from scholar_protocol.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        ["prisma-check", str(VALID_DIR / "prisma_slr_full.json"), "--json"],
+    )
+    assert result.exit_code == 0
+    output = json.loads(result.stdout)
+    assert "total_items" in output
+    assert "addressed_items" in output
+    assert "compliance_score" in output
+    assert "sections" in output
+
+
+def test_prisma_check_cli_nonexistent():
+    """prisma-check CLI with non-existent path exits 2."""
+    from typer.testing import CliRunner
+
+    from scholar_protocol.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        ["prisma-check", "/tmp/nonexistent_protocol.json"],
+    )
+    assert result.exit_code == 2

@@ -435,6 +435,14 @@
           "description": "Expected size of the initial candidate pool (min <= max)",
           "title": "Target Candidate Pool Size",
           "type": "object"
+        },
+        "golden_seeds": {
+          "description": "DOIs of 2-5 landmark papers that must appear in search results",
+          "items": {
+            "type": "string"
+          },
+          "title": "Golden Seeds",
+          "type": "array"
         }
       },
       "required": [

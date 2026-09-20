@@ -39,6 +39,12 @@ from scholar_protocol.intent import IntentPacket
 from scholar_protocol.compiler import compile_protocol
 from scholar_protocol.render import render_screening_criteria
 from scholar_protocol.extraction import build_extraction_model, generate_extraction_prompt
+from scholar_protocol.identity import (
+    ProtocolIdentity,
+    ProtocolProducer,
+    get_protocol_identity,
+    mint_or_accept_protocol_id,
+)
 
 __version__ = "1.0.0"
 
@@ -70,6 +76,11 @@ __all__ = [
     # Extraction
     "build_extraction_model",
     "generate_extraction_prompt",
+    # Identity adapter
+    "ProtocolIdentity",
+    "ProtocolProducer",
+    "get_protocol_identity",
+    "mint_or_accept_protocol_id",
     # Version
     "__version__",
 ]
