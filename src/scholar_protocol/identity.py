@@ -7,12 +7,14 @@ identifiers, and producer provenance metadata to downstream envelopes.
 from __future__ import annotations
 
 import hashlib
+import importlib.metadata
 import json
 import os
 import pathlib
 import re
 import subprocess
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -20,10 +22,12 @@ from scholar_protocol.canonical import canonical_fingerprint, canonical_json
 from scholar_protocol.models import ResearchProtocol
 
 _PACKAGE_NAME = "scholar-protocol-kit"
-_PACKAGE_VERSION = "1.0.0"
+try:
+    _PACKAGE_VERSION = importlib.metadata.version(_PACKAGE_NAME)
+except importlib.metadata.PackageNotFoundError:
+    _PACKAGE_VERSION = "0+unknown"
 _PRT_ID_RE = re.compile(r"^PRT-[A-Za-z0-9][A-Za-z0-9._-]*$")
 _SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
-_DEFAULT_FALLBACK_COMMIT = "46874778cd0dde6d89414532b52d258843789132"
 
 
 class ProtocolProducer(BaseModel):
@@ -70,19 +74,8 @@ def resolve_producer_commit(explicit_commit: str | None = None) -> str:
         if val:
             return val
 
-    try:
-        pkg_dir = pathlib.Path(__file__).resolve().parent
-        res = subprocess.run(
-            ["git", "-C", str(pkg_dir), "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if res.returncode == 0 and res.stdout.strip():
-            return res.stdout.strip()
-    except Exception:
-        pass
-
+    # A vendored checkout belongs to the harness Git repository, so asking Git
+    # for HEAD there reports the harness revision. Prefer its exact kit pin.
     try:
         monorepo_root = pathlib.Path(__file__).resolve().parents[4]
         plugins_json = monorepo_root / ".agents" / "plugins" / "nexus-scholar" / "plugins.json"
@@ -93,10 +86,23 @@ def resolve_producer_commit(explicit_commit: str | None = None) -> str:
                     rev = p.get("default_rev", "").strip()
                     if rev:
                         return rev
-    except Exception:
+    except (OSError, json.JSONDecodeError, KeyError, TypeError):
         pass
 
-    return _DEFAULT_FALLBACK_COMMIT
+    try:
+        pkg_dir = pathlib.Path(__file__).resolve().parent
+        res = subprocess.run(
+            ["git", "-C", str(pkg_dir), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout.strip()
+    except OSError:
+        pass
+
+    return "unknown"
 
 
 def mint_or_accept_protocol_id(
